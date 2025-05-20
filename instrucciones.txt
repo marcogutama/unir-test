@@ -1,0 +1,19 @@
+renombrar web/constansts.loca.js a constants.js
+
+cat > entrypoint.sh << 'EOF'
+#!/bin/bash
+export PYTHONPATH=/opt/calc
+export FLASK_APP=app.api
+export FLASK_ENV=development
+cd /opt/calc
+flask run --host=0.0.0.0
+EOF
+
+chmod +x entrypoint.sh
+
+docker stop calculator-web calculator-api
+docker rm calculator-web calculator-api
+
+docker build -t calculator .
+docker run -d --name calculator-api -p 5000:5000 -v "$(pwd)":/opt/calc calculator /opt/calc/entrypoint.sh
+docker run -d --name calculator-web -p 8080:80 -v "$(pwd)"/web:/usr/share/nginx/html nginx:alpine
